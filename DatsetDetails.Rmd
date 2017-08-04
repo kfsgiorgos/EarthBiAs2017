@@ -1,0 +1,90 @@
+---
+title: "<br>  Los Alamos Lab Authentication Public Dataset"
+theme: moon
+output:
+  html_document: default
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+---
+
+##  Description    
+
+<big><span style="color:#141452">The dataset represents **58 consecutive days of authentication events** collected from individual **Windows-based desktop computers, servers, and Active Directory servers**. Each event is on a separate line in the form of "Time, Source user@domain, Destination user@domain, Source computer, Destination computer, Authentication type, Logon type, Authentication orientation, success/failure" and represents an authentication event at the given time.</span></big>    
+<big><span style="color:#141452">Also, there is **RedTeam** data which presents specific events taken from the authentication data.They present **known redteam compromise events** and may be used as ground truth of bad behavior that is different from normal user and computer activity.</span></big>
+<br><br>
+**10 first rows of 2 Million records**
+<br>
+```{r, include=FALSE}
+pkgs <- c("tidyverse", "data.table" )
+
+lapply(pkgs, FUN = function(X) {
+  do.call("require", list(X)) 
+})
+options(scipen = 999)
+millionRows <- as.data.table(readRDS("/home/kfsgiorgos/Rds2M.rds"))
+setnames(millionRows, names(millionRows), c("Time", "Source_User", "Destination_User", "Source_Comp", "Destination_Comp", "Authentication_Type",
+                                  "LogonType", "Authnetication_Orientation", "Success_Failure"))
+```
+
+```{r, results='asis', echo=FALSE}
+knitr::kable(millionRows[1:10])
+```
+
+<br><br>
+**10 first rows of AD authentications**    
+<br>
+```{r, results='asis', echo=FALSE}
+knitr::kable(millionRows[(Destination_User %in% grep(pattern = ".@DOM[0-9]", x = Destination_User, value = TRUE))][1:10])
+```
+
+<br><br>
+**Percentage of  Events of 2 Million records**    
+<br>
+```{r, tidy=TRUE, results='asis', echo=FALSE}
+knitr::kable(millionRows[, .(Event_Percentage = 100*.N/dim(millionRows)[1]), by = .(Authentication_Type, LogonType, 
+                                               Authnetication_Orientation, Success_Failure)][order(Event_Percentage,decreasing = T)])
+```
+
+
+## More Details about the dataset
+- **Source User@Domain:**
+<br>
+<big><span style="color:#141452"> The user initiating the authentication event. If the user ends in "$", then it is a computer account for the specified computer. 
+**Domain** is either DOMx, indicating an AD domain or Cx, indicating a local computer account on computer Cx </span></big>   
+<br>
+- **Destination User@Domain:**
+<br>
+<big><span style="color:#141452"> The user initiating that the authentication event is mapping to. In some cases **Source User** is **different** from **Destination User**, meaning that **Source User** attempts to become or **become the Destination User** </span></big>   
+<br>
+- **Source Computer:**
+<br>
+<big><span style="color:#141452">The computer originating the authentication event </span></big>   
+<br>
+- **Destination Computer:**
+<br>
+<big><span style="color:#141452">The computer that authentication event is terminating at. **Destination equals Source means local authentication on the computer.** **Source & Destination are different**, indicates an authentication from one computer to another. In other words, **moving through the network.**  </span></big>   
+
+## Related Work
+
+### Network-wide Anomaly Detection:  
+<big><span style="color:#141452"> Detecting source computers which have connected to several unusual destination computers. **Analysis is based only on "Time, Source Computer, Destination Computer".**The anomalies are based on degree distributions of the source and destination computers in the data. It can be seen that the average outdegree exceeds the average indegree for computers in the network. **Scenario of Anomaly:** Many destination computers connect to a small number of computers.</span></big>   
+
+### Connected Components and Credential Hopping in Authentication Graphs:  
+<big><span style="color:#141452"> The **first attacking activity is the** inappropriate use of another user’s credentials by an attacker on a computer within the network. **The second attacking activity is the** inappropriate use of a stolen credential to move from one computer to another. 
+**Suspicious Lateral Movement activity:** Authentication events representing both **login events to individual computers by users present at the machine**, as well as cross **network authentication events from one computer to another by users**. The latter case creates **two user to computer authentication events with the same time label**, one for each computer involved in the **lateral authentication movement.** 
+**Data Preprocess:** AD servers were **removed**, since every user continuously authenticates to these servers for a variety of automated housekeeping purposes. We **removed all computer account activity** (user names ending with the special “$” designation) and only consider human-driven and automated service user accounts. **Assumption:** The typical **user behavior would remain constant under changes to the credential cache size on each computer**. This assumption is most likely inaccurate.</span></big>   
+  
+### Authentication graphs: Analyzing user behavior within an enterprise network:
+<big><span style="color:#141452">The **scope** is improving the integrated security of all computers within an organization's network. **Data Preprocess:** The same as above. Also, the user's authentication activity is **static in terms of quantity on destination computers** over some predefined time period (one year or one month within this paper). They care about to how many computers a user connected. </span></big>
+
+### Topic modelling of authentication events in an enterprise computer network:
+<big><span style="color:#141452"> **Spope:** Determine the number of users present. The traffic from a computer or IP address is a **complex mixture of both automated and human activity**, which in turn might **represent a mixture of several individuals’ activity.** They used the columns: **"Time", "Destination User", "Destination Computer"**</span></big>
+
+
+#### Address of the dataset:
+<small><span style="color:#141452">http://csr.lanl.gov/data/cyber1/</span></small>
+
+
+
+
