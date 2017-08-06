@@ -54,15 +54,15 @@ class(envData[, 1])
 # load lubridate
 library(lubridate)
 ```
-# Conditional subset using dplyr
+Conditional subset using dplyr
 ```{r}
 filter(envData, STAID == "229" & RR > 100)
 ```
-# Conditional subset using dplyr & pipe
+Conditional subset using dplyr & pipe
 ```{r}
 envData %>% filter(STAID == "229" & RR > 100)
 ```
-# Update column using dplyr, pipes & lubridate
+Update column using dplyr, pipes & lubridate
 ```{r}
 envData <- envData %>% dplyr::mutate(DATE = lubridate::ymd(DATE))
 envData
