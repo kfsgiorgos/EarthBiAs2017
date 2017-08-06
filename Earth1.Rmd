@@ -46,60 +46,57 @@ class(envData[, 1])
 * **```Mutate```** to create new columns.
 * **```Summarise```** many values down to a single summary.
 
-**```magrittr```** comes with the pipe ```%>%``` and it is a powerful tool for chaining multiple operations. The point of the pipe is to help you write code in a way that easier to read and understand.
+**```magrittr```** comes with the pipe **```%>%```** and it is a powerful tool for chaining multiple operations. The point of the pipe is to help you write code in a way that easier to read and understand.
 
-**```lubridate```** simplifies parsing dates and times by handling a wide variety of formats and seperators. ```lubridate``` is not part of core tidyverse so we have to load it manually. 
+**```lubridate```** simplifies parsing dates and times by handling a wide variety of formats and seperators. It is not part of core tidyverse so we have to load it manually. 
 
-```{r, echo=FALSE}
-# load lubridate
-library(lubridate)
-```
-Conditional subset using dplyr
+Conditional subset using **```dplyr```**
 ```{r}
-filter(envData, STAID == "229" & RR > 100)
+dplyr::filter(envData, STAID == "229" & RR > 100)
 ```
-Conditional subset using dplyr & pipe
+Conditional subset using **```dplyr```** & **```magrittr```**
 ```{r}
-envData %>% filter(STAID == "229" & RR > 100)
-```
-Update column using dplyr, pipes & lubridate
-```{r}
-envData <- envData %>% dplyr::mutate(DATE = lubridate::ymd(DATE))
-envData
+envData %>% dplyr::filter(STAID %in% c("236", "230") & RR > 100)
 ```
 
 ### Update columns 
 
-We can easily parse dates using ```lubridate``` functions and reassign the result with ```mutate``` verb 
+We can easily parse dates using **```lubridate```** functions and reassign the result with **```mutate```** verb 
+```{r, eval=FALSE}
+# load lubridate
+library(lubridate)
+```
+
 ```{r}
 envData <- dplyr::mutate(envData, DATE = lubridate::ymd(DATE))
+glimpse(envData)
 ```
 
 ### Create new columns 
 When we are dealing with dates, there are two appoaches on how to create new columns.
 
-* First approach: use ```mutate``` with the time intervals that are under your interest.
-```{r}
-# Track the computational time for each operation
-appoach11 <- system.time(envData1 <- dplyr::mutate(envData, Year = lubridate::year(DATE)))
-appoach12 <- system.time(envData1 <- dplyr::mutate(envData1, Month = lubridate::month(DATE)))
-appoach13 <- system.time(envData1 <- dplyr::mutate(envData1, Day = lubridate::day(DATE)))
-dplyr::glimpse(envData1)
-```
-* Second approach:  use ```tidyr``` package to achieve the same result as above but it is by far slower than the first approach.
-```{r}
-# Track the computational time for seperate operation
-approach2 <- system.time(envData2 <- tidyr::separate(envData, DATE, c("Year", "Month", "Day")))
-dplyr::glimpse(envData2)
-```
-* We quantify the computational time difference between the two approaches
-```{r}
-appoach11[[3]] + appoach12[[3]] + appoach13[[3]] 
-```
+* First approach: use **```tidyr```** package to **separate** the DATE column and each part is a new column.
 
 ```{r}
-approach2[[3]] 
+# Track the computational time for seperate operation
+approach1 <- system.time(envData1 <- tidyr::separate(envData, DATE, c("Year", "Month", "Day")))
+dplyr::glimpse(envData1)
 ```
+* Second approach:  use **```mutate```** verb to create the new columns manually.
+```{r}
+# Track the computational time for each operation
+appoach21 <- system.time(envData <- dplyr::mutate(envData, Year = lubridate::year(DATE)))
+appoach22 <- system.time(envData <- dplyr::mutate(envData, Month = lubridate::month(DATE)))
+appoach23 <- system.time(envData <- dplyr::mutate(envData, Day = lubridate::day(DATE)))
+dplyr::glimpse(envData1)
+
+```
+* The comparison between the two approaches shows that the second is by far more efficient. 
+```{r, echo=FALSE}
+paste0("1st approach time: ", round(approach1[[3]], 2), " vs ", "2nd approach time: ", round(appoach21[[3]] + appoach22[[3]] + appoach23[[3]]), 2)
+```
+
+
 
 
 
