@@ -1,5 +1,19 @@
-Untitled
+Big data processing using `sparklyr` <br>
 ================
+Kostas Mammas, Statistical Programmer <br> mail: <mammaskon@gmail.com> <br>
+EarthBiAs2017, Rhodes Island, Greece
+
+-   [Introduction](#introduction)
+    -   [Load the *core* `tidyverse` packages](#load-the-core-tidyverse-packages)
+    -   [`tibble`](#tibble)
+    -   [`dplyr`, `magrittr` & `lubridate`](#dplyr-magrittr-lubridate)
+    -   [Update columns](#update-columns)
+    -   [Create new columns](#create-new-columns)
+    -   [Update column conditionally](#update-column-conditionally)
+    -   [Grouped summaries](#grouped-summaries)
+-   [Explore missing values](#explore-missing-values)
+    -   [Group by *NA* values](#group-by-na-values)
+    -   [`filter`, `group_by` & count with: **`tally()`** and **`count()`**](#filter-group_by-count-with-tally-and-count)
 
 Introduction
 ============
@@ -182,7 +196,7 @@ dplyr::glimpse(envData)
 
 <!-- -->
 
-    ## [1] "1st approach time: 27.11 vs 2nd approach time: 12"
+    ## [1] "1st approach time: 19.22 vs 2nd approach time: 12"
 
 ### Update column conditionally
 
